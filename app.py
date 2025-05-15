@@ -6,27 +6,20 @@ from ultralytics import YOLO
 import tempfile
 import os
 
-# Load YOLOv8 model
-model = YOLO("best.pt")  # Replace with your custom model path if needed
+model = YOLO("best.pt")  # Your custom model path
 
 st.set_page_config(page_title="Object Detection App", layout="wide")
 st.title("🚗 Object Detection App (YOLOv8)")
 
-# Sidebar controls
-st.sidebar.header("Upload File")
 file = st.sidebar.file_uploader("Choose an image or video", type=["jpg", "jpeg", "png", "mp4", "mov"])
 
-# Confidence slider with custom discrete options
-confidence_options = [0.0, 0.2, 0.5, 0.7, 0.95]
-confidence_index = st.sidebar.selectbox("Confidence Threshold:", options=range(len(confidence_options)), format_func=lambda i: f"{int(confidence_options[i]*100)}%")
-confidence = confidence_options[confidence_index]
-
-iou_thresh = st.sidebar.slider("IoU Threshold:", 0.0, 1.0, 0.5)
+# Continuous sliders for confidence and IoU
+confidence = st.sidebar.slider("Confidence Threshold:", 0.0, 1.0, 0.5, 0.01)
+iou_thresh = st.sidebar.slider("IoU Threshold:", 0.0, 1.0, 0.5, 0.01)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("Made with ❤️ using Streamlit and YOLOv8")
 
-# Main logic
 if file is not None:
     file_type = file.type
 
@@ -34,7 +27,6 @@ if file is not None:
         image = Image.open(file)
         st.image(image, caption="Uploaded Image", use_container_width=True)
 
-        # Convert image to NumPy for YOLOv8
         image_np = np.array(image)
         results = model(image_np, conf=confidence, iou=iou_thresh)
         annotated_img = np.squeeze(results[0].plot())
