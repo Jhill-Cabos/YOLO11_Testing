@@ -9,30 +9,22 @@ import os
 # Load YOLOv8 model
 model = YOLO("best.pt")  # Replace with your custom model path if needed
 
-st.set_page_config(page_title="Object Detection App using YOLO11", layout="wide")
-st.title("🚗 Object Detection App (YOLO11)")
+st.set_page_config(page_title="Object Detection App", layout="wide")
+st.title("🚗 Object Detection App (YOLOv8)")
 
 # Sidebar controls
 st.sidebar.header("Upload File")
 file = st.sidebar.file_uploader("Choose an image or video", type=["jpg", "jpeg", "png", "mp4", "mov"])
 
-# Custom select slider with specific thresholds (percent)
-confidence_percent = st.sidebar.select_slider(
-    "Confidence Threshold (%)",
-    options=[0, 20, 50, 70, 95],
-    value=50
-)
-confidence = confidence_percent / 100
+# Confidence slider with custom discrete options
+confidence_options = [0.0, 0.2, 0.5, 0.7, 0.95]
+confidence_index = st.sidebar.selectbox("Confidence Threshold:", options=range(len(confidence_options)), format_func=lambda i: f"{int(confidence_options[i]*100)}%")
+confidence = confidence_options[confidence_index]
 
-iou_percent = st.sidebar.select_slider(
-    "IoU Threshold (%)",
-    options=[0, 20, 50, 70, 95],
-    value=50
-)
-iou_thresh = iou_percent / 100
+iou_thresh = st.sidebar.slider("IoU Threshold:", 0.0, 1.0, 0.5)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("Made with ❤️ using Streamlit and YOLO11")
+st.sidebar.markdown("Made with ❤️ using Streamlit and YOLOv8")
 
 # Main logic
 if file is not None:
@@ -40,14 +32,14 @@ if file is not None:
 
     if "image" in file_type:
         image = Image.open(file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
 
         # Convert image to NumPy for YOLOv8
         image_np = np.array(image)
         results = model(image_np, conf=confidence, iou=iou_thresh)
         annotated_img = np.squeeze(results[0].plot())
 
-        st.image(annotated_img, caption="Detection Result", use_column_width=True)
+        st.image(annotated_img, caption="Detection Result", use_container_width=True)
 
     elif "video" in file_type:
         tfile = tempfile.NamedTemporaryFile(delete=False)
@@ -76,7 +68,7 @@ if file is not None:
             annotated_frame = np.squeeze(results[0].plot())
             out.write(annotated_frame)
 
-            stframe.image(annotated_frame, channels="BGR", use_column_width=True)
+            stframe.image(annotated_frame, channels="BGR", use_container_width=True)
 
         cap.release()
         out.release()
