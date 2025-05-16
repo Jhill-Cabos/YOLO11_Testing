@@ -6,7 +6,7 @@ from ultralytics import YOLO
 import tempfile
 import os
 
-model = YOLO("yolo1.pt")  # Your custom model path
+model = YOLO("yolo2.pt")  # Your custom model path
 
 st.set_page_config(page_title="Object Detection App", layout="wide")
 st.title("🚗 Object Detection App (YOLOv8)")
