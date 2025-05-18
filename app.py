@@ -6,11 +6,14 @@ from ultralytics import YOLO
 import tempfile
 import os
 
+# Load the model
 model = YOLO("yolo24k.pt")  # Your custom model path
 
+# Set page config
 st.set_page_config(page_title="Object Detection App", layout="wide")
-st.title("🚗 Object Detection App (YOLOv8)")
+st.title("🚗 Reckless Driving Behaviours using YOLOV11")
 
+# Sidebar for file upload and parameters
 file = st.sidebar.file_uploader("Choose an image or video", type=["jpg", "jpeg", "png", "mp4", "mov"])
 
 # Continuous sliders for confidence and IoU
@@ -18,12 +21,26 @@ confidence = st.sidebar.slider("Confidence Threshold:", 0.0, 1.0, 0.5, 0.01)
 iou_thresh = st.sidebar.slider("IoU Threshold:", 0.0, 1.0, 0.5, 0.01)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("Made with ❤️ using Streamlit and YOLOv8")
+st.sidebar.markdown("YOLOV11")
+
+# Define reckless driving behaviors
+reckless_classes = {1, 2, 4, 5, 6}  # Texting, Talking on the phone, Drinking, Reaching Behind, Hair and Makeup
+safe_classes = {0}  # Safe Driving
+
+def classify_recklessness(class_id):
+    """Classify the behavior as 'reckless' or 'not reckless'."""
+    if class_id in reckless_classes:
+        return "Reckless Driving"
+    elif class_id in safe_classes:
+        return "Not Reckless Driving"
+    else:
+        return "Unknown"
 
 if file is not None:
     file_type = file.type
 
     if "image" in file_type:
+        # Handle image input
         image = Image.open(file)
         st.image(image, caption="Uploaded Image", use_container_width=True)
 
@@ -31,9 +48,16 @@ if file is not None:
         results = model(image_np, conf=confidence, iou=iou_thresh)
         annotated_img = np.squeeze(results[0].plot())
 
-        st.image(annotated_img, caption="Detection Result", use_container_width=True)
+        # Add recklessness classification to the image
+        for result in results[0].boxes:
+            class_id = int(result.cls)
+            label = classify_recklessness(class_id)
+            st.text(f"Detected: {label}")
+
+        st.image(annotated_img, caption="Detection Result with Classification", use_container_width=True)
 
     elif "video" in file_type:
+        # Handle video input
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(file.read())
         video_path = tfile.name
@@ -58,8 +82,16 @@ if file is not None:
 
             results = model(frame, conf=confidence, iou=iou_thresh)
             annotated_frame = np.squeeze(results[0].plot())
-            out.write(annotated_frame)
 
+            # Add recklessness classification to each frame
+            for result in results[0].boxes:
+                class_id = int(result.cls)
+                label = classify_recklessness(class_id)
+                # Display the classification on the frame
+                cv2.putText(annotated_frame, label, (int(result.xyxy[0]), int(result.xyxy[1])),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+            out.write(annotated_frame)
             stframe.image(annotated_frame, channels="BGR", use_container_width=True)
 
         cap.release()
