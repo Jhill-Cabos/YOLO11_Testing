@@ -50,8 +50,6 @@ if file is not None:
         tfile.write(file.read())
         video_path = tfile.name
 
-        st.video(video_path)
-
         cap = cv2.VideoCapture(video_path)
         output_folder = "outputs"
         os.makedirs(output_folder, exist_ok=True)
@@ -76,14 +74,11 @@ if file is not None:
             label = classify_recklessness(class_ids)
 
             for result in results[0].boxes:
-                # Extracting bounding box coordinates
                 xmin, ymin, xmax, ymax = map(int, result.xyxy[0].cpu().numpy())
 
-                # Increase font size for "Reckless Driving"
                 font_scale = 1.5 if label == "Reckless Driving" else 0.7
                 color = (0, 0, 255) if label == "Reckless Driving" else (0, 255, 0)
 
-                # Position the text on the frame
                 cv2.putText(annotated_frame, label, (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2)
 
             out.write(annotated_frame)
@@ -94,6 +89,6 @@ if file is not None:
 
         if os.path.exists(out_path):
             st.success("Video processing complete!")
-            st.video(out_path)  # Display the video from the local 'outputs' folder
+            st.video(out_path)  # Only display the processed video here
         else:
             st.error(f"Video file not found at {out_path}")
