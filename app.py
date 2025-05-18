@@ -51,8 +51,8 @@ if file is not None:
         video_path = tfile.name
 
         cap = cv2.VideoCapture(video_path)
-
         stframe = st.empty()
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -68,7 +68,8 @@ if file is not None:
                 xmin, ymin, xmax, ymax = map(int, result.xyxy[0].cpu().numpy())
                 font_scale = 1.5 if label == "Reckless Driving" else 0.7
                 color = (0, 0, 255) if label == "Reckless Driving" else (0, 255, 0)
-                cv2.putText(annotated_frame, label, (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2)
+                label_position = (xmax - 150, ymax + 30)
+                cv2.putText(annotated_frame, label, label_position, cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2)
 
             stframe.image(annotated_frame, channels="BGR", use_container_width=True)
 
