@@ -75,8 +75,11 @@ if file is not None:
             label = classify_recklessness(class_ids)
 
             for result in results[0].boxes:
+                font_scale = 1.5 if label == "Reckless Driving" else 0.7
+                color = (0, 0, 255) if label == "Reckless Driving" else (0, 255, 0)
+                
                 cv2.putText(annotated_frame, label, (int(result.xyxy[0]), int(result.xyxy[1])),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2)
 
             out.write(annotated_frame)
             stframe.image(annotated_frame, channels="BGR", use_container_width=True)
