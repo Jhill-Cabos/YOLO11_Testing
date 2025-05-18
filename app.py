@@ -32,7 +32,7 @@ def classify_recklessness(class_id):
     if class_id in reckless_classes:
         return "Reckless Driving"
     else:
-        return "Safe Driving"
+        return "Not Reckless Driving"
 
 if file is not None:
     file_type = file.type
