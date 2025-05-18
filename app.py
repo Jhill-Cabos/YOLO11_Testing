@@ -19,7 +19,7 @@ iou_thresh = st.sidebar.slider("IoU Threshold:", 0.0, 1.0, 0.5, 0.01)
 st.sidebar.markdown("---")
 st.sidebar.markdown("By Jhillian Millare Cabos")
 
-reckless_classes = {1, 2, 4, 5, 6 ,7, 8 ,9, 10}
+reckless_classes = {1, 2, 4, 5, 6 ,7, 9, 10}
 safe_classes = {0}
 
 def classify_recklessness(class_ids):
