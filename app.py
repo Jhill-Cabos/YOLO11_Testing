@@ -24,7 +24,7 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("YOLOV11")
 
 # Define reckless driving behaviors
-reckless_classes = {1, 2, 4, 5, 6, 7, 8 ,9 ,10 ,11}  # Texting, Talking on the phone, Drinking, Reaching Behind, Hair and Makeup
+reckless_classes = {1, 2, 4, 5, 6, 7, 8 ,9 ,10}  # Texting, Talking on the phone, Drinking, Reaching Behind, Hair and Makeup
 safe_classes = {0}  # Safe Driving
 
 def classify_recklessness(class_id):
