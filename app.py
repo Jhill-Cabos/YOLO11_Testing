@@ -53,9 +53,10 @@ if file is not None:
         st.video(video_path)
 
         cap = cv2.VideoCapture(video_path)
-        out_path = os.path.join("outputs", os.path.basename(video_path))
-        os.makedirs("outputs", exist_ok=True)
+        output_folder = "outputs"
+        os.makedirs(output_folder, exist_ok=True)
 
+        out_path = os.path.join(output_folder, "processed_video.mp4")
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         fps = cap.get(cv2.CAP_PROP_FPS)
         width = int(cap.get(3))
@@ -75,19 +76,20 @@ if file is not None:
             label = classify_recklessness(class_ids)
 
             for result in results[0].boxes:
-                xyxy = result.xyxy[0].numpy()  # Extracting the bounding box coordinates
-                xmin, ymin, xmax, ymax = map(int, xyxy)
                 font_scale = 1.5 if label == "Reckless Driving" else 0.7
                 color = (0, 0, 255) if label == "Reckless Driving" else (0, 255, 0)
-
-                # Position the text on the frame
-                cv2.putText(annotated_frame, label, (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2)
+                
+                cv2.putText(annotated_frame, label, (int(result.xyxy[0]), int(result.xyxy[1])),
+                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2)
 
             out.write(annotated_frame)
             stframe.image(annotated_frame, channels="BGR", use_container_width=True)
 
         cap.release()
         out.release()
-        st.success("Video processing complete!")
 
-        st.video(out_path)
+        if os.path.exists(out_path):
+            st.success("Video processing complete!")
+            st.video(out_path)  # Display the video from the local 'outputs' folder
+        else:
+            st.error(f"Video file not found at {out_path}")
