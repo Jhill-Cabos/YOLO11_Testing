@@ -4,7 +4,6 @@ import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 import tempfile
-import os
 
 model = YOLO("yolo24k.pt")
 
@@ -19,7 +18,7 @@ iou_thresh = st.sidebar.slider("IoU Threshold:", 0.0, 1.0, 0.5, 0.01)
 st.sidebar.markdown("---")
 st.sidebar.markdown("By Jhillian Millare Cabos")
 
-reckless_classes = {1, 2, 4, 5, 6 ,7, 9, 10}
+reckless_classes = {1, 2, 4, 5, 6, 7, 9, 10}
 safe_classes = {0}
 
 def classify_recklessness(class_ids):
@@ -51,21 +50,17 @@ if file is not None:
         video_path = tfile.name
 
         cap = cv2.VideoCapture(video_path)
-        output_folder = "outputs"
-        os.makedirs(output_folder, exist_ok=True)
-
-        out_path = os.path.join(output_folder, "processed_video.mp4")
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        width = int(cap.get(3))
-        height = int(cap.get(4))
-        out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
-
         stframe = st.empty()
+        labels_box = st.empty()
+
+        frame_count = 0
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
+
+            frame_count += 1
+            frame = cv2.resize(frame, (640, 360))
 
             results = model(frame, conf=confidence, iou=iou_thresh)
             annotated_frame = np.squeeze(results[0].plot())
@@ -73,22 +68,8 @@ if file is not None:
             class_ids = [int(result.cls) for result in results[0].boxes]
             label = classify_recklessness(class_ids)
 
-            for result in results[0].boxes:
-                xmin, ymin, xmax, ymax = map(int, result.xyxy[0].cpu().numpy())
-
-                font_scale = 1.5 if label == "Reckless Driving" else 0.7
-                color = (0, 0, 255) if label == "Reckless Driving" else (0, 255, 0)
-
-                cv2.putText(annotated_frame, label, (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, 2)
-
-            out.write(annotated_frame)
             stframe.image(annotated_frame, channels="BGR", use_container_width=True)
+            labels_box.markdown(f"**Frame {frame_count} — Detected:** {label}")
 
         cap.release()
-        out.release()
-
-        if os.path.exists(out_path):
-            st.success("Video processing complete!")
-            st.video(out_path)  # Only display the processed video here
-        else:
-            st.error(f"Video file not found at {out_path}")
+        st.success("✅ Video processing complete!")
