@@ -6,7 +6,7 @@ from ultralytics import YOLO
 import tempfile
 import os
 
-model = YOLO("yolo24k.pt")
+model = YOLO("best.pt")
 
 st.set_page_config(page_title="Reckless Driving Behaviours using YOLOV11", layout="wide")
 st.title("🚗 Reckless Driving Behaviours using YOLOV11")
